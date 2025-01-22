@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
-import { Game, Player, Score } from '@/types';
+import { Player } from '@/types';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
 
 type PlayerStats = {

@@ -23,7 +23,7 @@ export default function Players() {
       setNewPlayer({ name: '', phoneNumber: '' });
       toast.success('¡Jugador registrado exitosamente!');
     } catch (error) {
-      toast.error('Error al registrar el jugador');
+      toast.error('Error al registrar el jugador' + error);
     }
   };
 
@@ -32,7 +32,7 @@ export default function Players() {
       await deleteDoc(doc(db, 'players', id));
       toast.success('¡Jugador eliminado exitosamente!');
     } catch (error) {
-      toast.error('Error al eliminar el jugador');
+      toast.error('Error al eliminar el jugador' + error);
     }
   };
 

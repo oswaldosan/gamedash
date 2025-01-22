@@ -73,7 +73,7 @@ export default function Scoring() {
             >
               <option value="" className="text-gray-400">Selecciona un juego...</option>
               {games.map((game) => {
-                const Icon = getGameIcon(game.name);
+                getGameIcon(game.name);
                 return (
                   <option key={game.id} value={game.id} className="text-gray-900">
                     {game.name}

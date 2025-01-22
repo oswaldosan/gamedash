@@ -25,7 +25,7 @@ export default function Games() {
       setNewGame({ name: '', winPoints: 0, participationPoints: 0 });
       toast.success('¡Juego agregado exitosamente!');
     } catch (error) {
-      toast.error('Error al agregar el juego');
+      toast.error('Error al agregar el juego' + error);
     }
   };
 
@@ -34,7 +34,7 @@ export default function Games() {
       await deleteDoc(doc(db, 'games', id));
       toast.success('¡Juego eliminado exitosamente!');
     } catch (error) {
-      toast.error('Error al eliminar el juego');
+      toast.error('Error al eliminar el juego' + error);
     }
   };
 
