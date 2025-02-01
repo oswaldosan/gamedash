@@ -1,17 +1,50 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useApp } from '@/context/AppContext';
 import { addDoc, collection, doc, updateDoc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import toast from 'react-hot-toast';
 import { getGameIcon } from '@/utils/gameIcons';
+import debounce from 'lodash/debounce';
+import { getCountryFromNumber } from '@/utils/countryConfig';
 
 export default function Scoring() {
   const { games, players, loading } = useApp();
   const [selectedGame, setSelectedGame] = useState('');
   const [selectedPlayer, setSelectedPlayer] = useState('');
+  const [searchNumber, setSearchNumber] = useState('');
   const [pointType, setPointType] = useState<'win' | 'participation'>('win');
+  const [filteredPlayers, setFilteredPlayers] = useState<typeof players>([]);
+  const [showPlayerDropdown, setShowPlayerDropdown] = useState(false);
 
   const selectedGameData = games.find((game) => game.id === selectedGame);
+
+  // Debounced search function
+  const debouncedSearch = useCallback(
+    debounce((number: string) => {
+      if (number.length >= 4) {
+        const filtered = players.filter(player => 
+          player.playerNumber.toLowerCase().includes(number.toLowerCase())
+        );
+        setFilteredPlayers(filtered);
+        setShowPlayerDropdown(true);
+      } else {
+        setFilteredPlayers([]);
+        setShowPlayerDropdown(false);
+      }
+    }, 300),
+    [players]
+  );
+
+  const handleNumberChange = (value: string) => {
+    setSearchNumber(value);
+    debouncedSearch(value);
+  };
+
+  const selectPlayer = (player: typeof players[0]) => {
+    setSelectedPlayer(player.id);
+    setSearchNumber(player.playerNumber);
+    setShowPlayerDropdown(false);
+  };
 
   const handleScore = async () => {
     if (!selectedGame || !selectedPlayer) {
@@ -59,28 +92,32 @@ export default function Scoring() {
       <div className="bg-white shadow-sm rounded-lg p-6">
         <h2 className="text-xl font-semibold mb-6">Registrar Puntos</h2>
         <div className="space-y-6">
-          {/* Game Selection */}
+          {/* Game Selection Grid */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-4">
               Seleccionar Juego
             </label>
-            <select
-              value={selectedGame}
-              onChange={(e) => setSelectedGame(e.target.value)}
-              className="h-12 mt-1 block w-full rounded-lg border-gray-300 shadow-sm 
-                focus:border-indigo-500 focus:ring-indigo-500 
-                text-gray-900 text-base px-4 appearance-none bg-white"
-            >
-              <option value="" className="text-gray-400">Selecciona un juego...</option>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {games.map((game) => {
-                getGameIcon(game.name);
+                const Icon = getGameIcon(game.name);
+                const isSelected = selectedGame === game.id;
                 return (
-                  <option key={game.id} value={game.id} className="text-gray-900">
-                    {game.name}
-                  </option>
+                  <button
+                    key={game.id}
+                    onClick={() => setSelectedGame(game.id)}
+                    className={`p-4 rounded-xl border-2 transition-all duration-200 flex flex-col items-center gap-3
+                      ${isSelected 
+                        ? 'border-blue-600 bg-blue-50 text-blue-700' 
+                        : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'}`}
+                  >
+                    <Icon className={`w-8 h-8 ${isSelected ? 'text-blue-600' : 'text-gray-500'}`} />
+                    <span className={`text-sm font-medium ${isSelected ? 'text-blue-700' : 'text-gray-700'}`}>
+                      {game.name}
+                    </span>
+                  </button>
                 );
               })}
-            </select>
+            </div>
           </div>
 
           {/* Point Type Selection */}
@@ -89,57 +126,100 @@ export default function Scoring() {
               <label className="block text-sm font-medium text-gray-700 mb-3">
                 Tipo de Puntos
               </label>
-              <div className="flex gap-6">
-                <label className="inline-flex items-center">
-                  <input
-                    type="radio"
-                    className="h-5 w-5 form-radio text-indigo-600 focus:ring-indigo-500"
-                    name="pointType"
-                    value="win"
-                    checked={pointType === 'win'}
-                    onChange={(e) => setPointType(e.target.value as 'win' | 'participation')}
-                  />
-                  <span className="ml-3 text-base text-gray-900">
-                    Victoria ({selectedGameData?.winPoints} puntos)
-                  </span>
-                </label>
-                <label className="inline-flex items-center">
-                  <input
-                    type="radio"
-                    className="h-5 w-5 form-radio text-indigo-600 focus:ring-indigo-500"
-                    name="pointType"
-                    value="participation"
-                    checked={pointType === 'participation'}
-                    onChange={(e) => setPointType(e.target.value as 'win' | 'participation')}
-                  />
-                  <span className="ml-3 text-base text-gray-900">
-                    Participación ({selectedGameData?.participationPoints} puntos)
-                  </span>
-                </label>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setPointType('win')}
+                  className={`flex-1 p-4 rounded-xl border-2 transition-all duration-200
+                    ${pointType === 'win'
+                      ? 'border-green-600 bg-green-50 text-green-700'
+                      : 'border-gray-200 hover:border-green-300 hover:bg-gray-50'}`}
+                >
+                  <div className="text-lg font-semibold">Victoria</div>
+                  <div className="text-2xl font-bold mt-1">
+                    {selectedGameData?.winPoints} pts
+                  </div>
+                </button>
+                <button
+                  onClick={() => setPointType('participation')}
+                  className={`flex-1 p-4 rounded-xl border-2 transition-all duration-200
+                    ${pointType === 'participation'
+                      ? 'border-blue-600 bg-blue-50 text-blue-700'
+                      : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'}`}
+                >
+                  <div className="text-lg font-semibold">Participación</div>
+                  <div className="text-2xl font-bold mt-1">
+                    {selectedGameData?.participationPoints} pts
+                  </div>
+                </button>
               </div>
             </div>
           )}
 
-          {/* Player Selection */}
+          {/* Player Search */}
           {selectedGame && (
-            <div>
+            <div className="relative space-y-3">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Seleccionar Jugador
+                Número de Jugador
               </label>
-              <select
-                value={selectedPlayer}
-                onChange={(e) => setSelectedPlayer(e.target.value)}
+              <input
+                type="text"
+                value={searchNumber}
+                onChange={(e) => handleNumberChange(e.target.value)}
+                placeholder="Ingrese el número de jugador..."
                 className="h-12 mt-1 block w-full rounded-lg border-gray-300 shadow-sm 
                   focus:border-indigo-500 focus:ring-indigo-500 
-                  text-gray-900 text-base px-4 appearance-none bg-white"
-              >
-                <option value="" className="text-gray-400">Selecciona un jugador...</option>
-                {players.map((player) => (
-                  <option key={player.id} value={player.id} className="text-gray-900">
-                    {player.name}
-                  </option>
-                ))}
-              </select>
+                  text-gray-900 text-base px-4"
+              />
+              {showPlayerDropdown && filteredPlayers.length > 0 && (
+                <div className="absolute z-10 w-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200">
+                  {filteredPlayers.map((player) => {
+                    const countryConfig = getCountryFromNumber(player.playerNumber);
+                    return (
+                      <button
+                        key={player.id}
+                        onClick={() => selectPlayer(player)}
+                        className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center space-x-3 text-gray-900"
+                      >
+                        <div className={`w-8 h-8 rounded-full ${countryConfig?.bgColor || 'bg-gray-100'} 
+                          flex items-center justify-center text-xs font-bold ${countryConfig?.textColor || 'text-gray-600'}`}
+                        >
+                          #{player.playerNumber}
+                        </div>
+                        <div>
+                          <div className="font-medium">{player.name}</div>
+                          <div className="text-sm text-gray-500">{countryConfig?.name}</div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              {selectedPlayer && !showPlayerDropdown && (
+                <div className="mt-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Jugador Seleccionado
+                  </label>
+                  <div className="flex items-center space-x-3 h-12 px-4 bg-gray-50 rounded-lg border border-gray-200">
+                    {(() => {
+                      const player = players.find(p => p.id === selectedPlayer);
+                      const countryConfig = player ? getCountryFromNumber(player.playerNumber) : null;
+                      return (
+                        <>
+                          <div className={`w-8 h-8 rounded-full ${countryConfig?.bgColor || 'bg-gray-100'} 
+                            flex items-center justify-center text-xs font-bold ${countryConfig?.textColor || 'text-gray-600'}`}
+                          >
+                            #{player?.playerNumber}
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-medium text-gray-900">{player?.name}</div>
+                            <div className="text-sm text-gray-500">{countryConfig?.name}</div>
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -196,9 +276,6 @@ function RecentScores({ selectedGame }: { selectedGame: string }) {
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Puntos
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Fecha
-            </th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
@@ -215,9 +292,6 @@ function RecentScores({ selectedGame }: { selectedGame: string }) {
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 {score.points} puntos
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                {new Date(score.createdAt).toLocaleString('es-ES')}
               </td>
             </tr>
           ))}

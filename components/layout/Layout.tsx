@@ -15,10 +15,10 @@ export default function Layout({ children }: LayoutProps) {
         className="flex-grow"
         style={{
           backgroundImage: `linear-gradient(to bottom right, 
-            rgba(0, 59, 145, 0.5), 
-            rgba(23, 70, 158, 0.5), 
-            rgba(0, 59, 145, 0.5)
-          ), url('/bgjp.jpg')`,
+            rgba(0, 59, 145, 0), 
+            rgba(23, 70, 158, 0), 
+            rgba(0, 59, 145, 0)
+          ), url('/bg.jpg')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat'

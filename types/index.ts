@@ -9,7 +9,9 @@ export interface Game {
   export interface Player {
     id: string;
     name: string;
-    phoneNumber: string;
+    playerNumber: string;
+    country: string;
+    color: string;
     totalPoints: number;
     createdAt: Date;
   }
