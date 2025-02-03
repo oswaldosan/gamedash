@@ -29,7 +29,7 @@ export default function Login() {
         setError('Credenciales inválidas');
       }
     } catch (error) {
-      setError('Error al iniciar sesión');
+      setError('Error al iniciar sesión' + error);
     }
   };
 
