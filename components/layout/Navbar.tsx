@@ -2,21 +2,39 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon, XMarkIcon, UserCircleIcon } from '@heroicons/react/24/outline';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Navbar() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   const isActive = (path: string) => router.pathname === path;
 
-  const navigation = [
-    { name: 'Inicio', href: '/' },
-    { name: 'Juegos', href: '/games' },
-    { name: 'Jugadores', href: '/players' },
-    { name: 'Agregar Puntuación', href: '/scoring' },
-    { name: 'Tabla de Posiciones', href: '/leaderboard' },
-  ];
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
+  };
+
+  // Filtrar navegación según el rol
+  const getNavigation = () => {
+    const baseNavigation = [
+      { name: 'Inicio', href: '/' },
+      { name: 'Jugadores', href: '/players' },
+      { name: 'Agregar Puntuación', href: '/scoring' },
+      { name: 'Tabla de Posiciones', href: '/leaderboard' },
+    ];
+
+    // Solo mostrar "Juegos" si es admin
+    if (user?.role === 'admin') {
+      baseNavigation.splice(1, 0, { name: 'Juegos', href: '/games' });
+    }
+
+    return baseNavigation;
+  };
+
+  const navigation = getNavigation();
 
   return (
     <nav className="bg-[#003b91] shadow-lg">
@@ -50,6 +68,23 @@ export default function Navbar() {
                 </Link>
               ))}
             </div>
+          </div>
+
+          {/* User Profile & Logout */}
+          <div className="hidden md:flex items-center space-x-4">
+            <div className="flex items-center space-x-3 text-white px-3 py-2 rounded-md">
+              <UserCircleIcon className="h-6 w-6" />
+              <span>{user?.name}</span>
+              <span className="text-xs text-gray-300">
+                ({user?.role === 'admin' ? 'Administrador' : 'Edecán'})
+              </span>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="text-gray-200 hover:text-white hover:bg-[#17469e] px-3 py-2 rounded-md text-sm font-medium"
+            >
+              Cerrar Sesión
+            </button>
           </div>
 
           {/* Mobile menu button */}
@@ -89,6 +124,22 @@ export default function Navbar() {
               {item.name}
             </Link>
           ))}
+          {/* Mobile User Profile & Logout */}
+          <div className="border-t border-[#17469e] pt-2">
+            <div className="px-4 py-2 text-white flex items-center space-x-2">
+              <UserCircleIcon className="h-5 w-5" />
+              <span className="text-sm">{user?.name}</span>
+              <span className="text-xs text-gray-300">
+                ({user?.role === 'admin' ? 'Administrador' : 'Edecán'})
+              </span>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="block w-full text-left pl-3 pr-4 py-2 text-base font-medium text-gray-200 hover:bg-[#17469e] hover:text-white"
+            >
+              Cerrar Sesión
+            </button>
+          </div>
         </div>
       </div>
     </nav>
