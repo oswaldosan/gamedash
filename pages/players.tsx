@@ -4,7 +4,7 @@ import { addDoc, collection, deleteDoc, doc, query, orderBy, getDocs } from 'fir
 import { db } from '@/lib/firebase';
 import toast from 'react-hot-toast';
 import { UserIcon, IdentificationIcon, GlobeAmericasIcon } from '@heroicons/react/24/outline';
-import { getCountryFromNumber, COUNTRY_CONFIGS } from '@/utils/countryConfig';
+import { getCountryFromNumber } from '@/utils/countryConfig';
 
 export default function Players() {
   const { players, loading } = useApp();
