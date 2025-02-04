@@ -78,7 +78,7 @@ module.exports = {
     'text-slate-800',
     // Clases para Guatemala
     'bg-amber-900',
-    'text-amber-50',
+    'text-amber-400',
     // Clases para El Salvador
     'bg-rose-100',
     'text-rose-800',

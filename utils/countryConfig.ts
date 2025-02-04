@@ -26,7 +26,7 @@ export const COUNTRY_CONFIGS: { [key: string]: CountryConfig } = {
     name: 'Guatemala',
     color: 'CAFÉ',
     bgColor: 'bg-amber-900',
-    textColor: 'text-amber-50'
+    textColor: 'text-amber-400'
   },
   '81': {
     code: '81',
