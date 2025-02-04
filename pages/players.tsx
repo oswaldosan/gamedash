@@ -8,37 +8,39 @@ import { getCountryFromNumber } from '@/utils/countryConfig';
 
 export default function Players() {
   const { players, loading } = useApp();
+  const [lastNumber, setLastNumber] = useState('');
   const [newPlayer, setNewPlayer] = useState({
     name: '',
     playerNumber: '',
     country: '',
     color: '',
+    manualCountry: '',
   });
+  const [isManualCountry, setIsManualCountry] = useState(false);
 
-  // Obtener el último número correlativo
   useEffect(() => {
     const getNextPlayerNumber = async () => {
       const playersQuery = query(collection(db, 'players'), orderBy('playerNumber', 'desc'));
       const snapshot = await getDocs(playersQuery);
       const lastPlayer = snapshot.docs[0];
-      const nextNumber = lastPlayer ? (lastPlayer.data().playerNumber || 0) + 1 : 1;
-      setNewPlayer(prev => ({ ...prev, playerNumber: nextNumber.toString() }));
+      const nextNumber = lastPlayer ? (parseInt(lastPlayer.data().playerNumber) + 1).toString() : '1';
+      setLastNumber(nextNumber);
     };
 
     getNextPlayerNumber();
-  }, [players]); // Se actualiza cuando cambia la lista de jugadores
+  }, [players]);
 
   const handlePlayerNumberChange = (value: string) => {
     if (/^\d*$/.test(value)) {
-      setNewPlayer(prev => {
-        const countryConfig = getCountryFromNumber(value);
-        return {
-          ...prev,
-          playerNumber: value,
-          country: countryConfig?.name || '',
-          color: countryConfig?.color || '',
-        };
-      });
+      const countryConfig = getCountryFromNumber(value);
+      setNewPlayer(prev => ({
+        ...prev,
+        playerNumber: value,
+        country: countryConfig?.name || '',
+        color: countryConfig?.color || '',
+        manualCountry: '',
+      }));
+      setIsManualCountry(!countryConfig);
     }
   };
 
@@ -46,20 +48,30 @@ export default function Players() {
     e.preventDefault();
     try {
       const countryConfig = getCountryFromNumber(newPlayer.playerNumber);
-      if (!countryConfig) {
-        toast.error('Número de jugador no válido para ningún país');
-        return;
-      }
+      const countryData = countryConfig ? {
+        country: countryConfig.name,
+        color: countryConfig.color,
+      } : {
+        country: newPlayer.manualCountry || 'País no especificado',
+        color: 'GRIS',
+      };
 
       await addDoc(collection(db, 'players'), {
         name: newPlayer.name,
         playerNumber: newPlayer.playerNumber,
-        country: countryConfig.name,
-        color: countryConfig.color,
+        ...countryData,
         totalPoints: 0,
         createdAt: new Date(),
       });
-      setNewPlayer({ name: '', playerNumber: '', country: '', color: '' });
+      
+      setNewPlayer({ 
+        name: '', 
+        playerNumber: '', 
+        country: '', 
+        color: '', 
+        manualCountry: '' 
+      });
+      setIsManualCountry(false);
       toast.success('¡Jugador registrado exitosamente!');
     } catch (error) {
       toast.error('Error al registrar el jugador' + error);
@@ -121,7 +133,7 @@ export default function Players() {
                   className="h-12 block w-full rounded-lg border-gray-300 pl-10 
                     focus:border-indigo-500 focus:ring-indigo-500 
                     placeholder-gray-400 text-gray-900 text-base"
-                  placeholder="Ej: 08"
+                  placeholder={`CODIGO DE JUGADOR`}
                   required
                   pattern="\d+"
                 />
@@ -136,16 +148,37 @@ export default function Players() {
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <GlobeAmericasIcon className="h-5 w-5 text-gray-400" />
                 </div>
-                <input
-                  type="text"
-                  value={newPlayer.country}
-                  className="h-12 block w-full rounded-lg border-gray-300 pl-10 
-                    focus:border-indigo-500 focus:ring-indigo-500 
-                    placeholder-gray-400 text-gray-900 text-base bg-gray-50"
-                  placeholder="País se detectará automáticamente"
-                  disabled
-                />
+                {isManualCountry ? (
+                  <input
+                    type="text"
+                    value={newPlayer.manualCountry}
+                    onChange={(e) => setNewPlayer(prev => ({
+                      ...prev,
+                      manualCountry: e.target.value
+                    }))}
+                    className="h-12 block w-full rounded-lg border-gray-300 pl-10 
+                      focus:border-indigo-500 focus:ring-indigo-500 
+                      placeholder-gray-400 text-gray-900 text-base"
+                    placeholder="Ingresa el país manualmente"
+                    required
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    value={newPlayer.country}
+                    className="h-12 block w-full rounded-lg border-gray-300 pl-10 
+                      focus:border-indigo-500 focus:ring-indigo-500 
+                      placeholder-gray-400 text-gray-900 text-base bg-gray-50"
+                    placeholder="País se detectará automáticamente"
+                    disabled
+                  />
+                )}
               </div>
+              {!isManualCountry && newPlayer.playerNumber && !newPlayer.country && (
+                <p className="mt-2 text-sm text-blue-600">
+                  No se detectó el país automáticamente. Puedes ingresarlo manualmente.
+                </p>
+              )}
             </div>
           </div>
 
@@ -241,7 +274,7 @@ export default function Players() {
                       } ${
                         getCountryFromNumber(player.playerNumber)?.textColor || 'text-gray-800'
                       }`}>
-                        {getCountryFromNumber(player.playerNumber)?.name || 'País no definido'}
+                        {player.country || getCountryFromNumber(player.playerNumber)?.name || 'País no definido'}
                       </span>
                     </div>
                   </td>
