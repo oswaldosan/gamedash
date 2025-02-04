@@ -19,7 +19,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    // Verificar si hay una sesión guardada
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
       setUser(JSON.parse(savedUser));
@@ -27,7 +26,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (name: string, password?: string): Promise<boolean> => {
-    // Para admin, verificar credenciales
     if (password) {
       if (name === 'admin' && password === 'Boost@123') {
         const adminUser: User = { name: 'Administrador', role: 'admin' };
@@ -38,7 +36,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return false;
     }
 
-    // Para edecán, solo necesita nombre
     const edecanUser: User = { name, role: 'edecan' };
     setUser(edecanUser);
     localStorage.setItem('user', JSON.stringify(edecanUser));
