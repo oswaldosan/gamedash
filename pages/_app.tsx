@@ -24,7 +24,11 @@ function AuthGuard({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    if (!isAuthenticated && router.pathname !== '/login') {
+    // Lista de rutas públicas
+    const publicRoutes = ['/fullscreen-leaderboard', '/check', '/login'];
+    const isPublicRoute = publicRoutes.includes(router.pathname);
+
+    if (!isAuthenticated && !isPublicRoute) {
       router.push('/login');
     }
 
