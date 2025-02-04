@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useApp } from '@/context/AppContext';
-import { addDoc, collection, deleteDoc, doc, query, orderBy, getDocs } from 'firebase/firestore';
+import { addDoc, collection, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import toast from 'react-hot-toast';
 import { UserIcon, IdentificationIcon, GlobeAmericasIcon } from '@heroicons/react/24/outline';
