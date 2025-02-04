@@ -87,10 +87,7 @@ export default function LeaderboardTable({ players, games, scores, selectedGame 
           return (
             <tr
               key={playerStat.player.id}
-              className={`${
-                isTopThree ? `${countryConfig?.bgColor || 'bg-gray-50'} hover:bg-opacity-80` 
-                : 'hover:bg-gray-50'
-              } transition-colors duration-150`}
+              className={`bg-gray-50 hover:bg-opacity-80 transition-colors duration-150`} 
             >
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="flex items-center">
