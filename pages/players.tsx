@@ -8,7 +8,6 @@ import { getCountryFromNumber } from '@/utils/countryConfig';
 
 export default function Players() {
   const { players, loading } = useApp();
-  const [lastNumber, setLastNumber] = useState('');
   const [newPlayer, setNewPlayer] = useState({
     name: '',
     playerNumber: '',
@@ -17,18 +16,6 @@ export default function Players() {
     manualCountry: '',
   });
   const [isManualCountry, setIsManualCountry] = useState(false);
-
-  useEffect(() => {
-    const getNextPlayerNumber = async () => {
-      const playersQuery = query(collection(db, 'players'), orderBy('playerNumber', 'desc'));
-      const snapshot = await getDocs(playersQuery);
-      const lastPlayer = snapshot.docs[0];
-      const nextNumber = lastPlayer ? (parseInt(lastPlayer.data().playerNumber) + 1).toString() : '1';
-      setLastNumber(nextNumber);
-    };
-
-    getNextPlayerNumber();
-  }, [players]);
 
   const handlePlayerNumberChange = (value: string) => {
     if (/^\d*$/.test(value)) {
