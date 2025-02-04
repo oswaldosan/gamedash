@@ -48,6 +48,13 @@ export const COUNTRY_CONFIGS: { [key: string]: CountryConfig } = {
     color: 'AZUL',
     bgColor: 'bg-sky-100',
     textColor: 'text-sky-800'
+  },
+  '41': {
+    code: '41',
+    name: 'Honduras',
+    color: 'AZUL',
+    bgColor: 'bg-sky-100',
+    textColor: 'text-sky-800'
   }
 };
 
