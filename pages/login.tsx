@@ -22,14 +22,14 @@ export default function Login() {
     setError('');
 
     try {
-      const success = await login(name, isAdmin ? password : undefined);
+      const success = await login(name, password, isAdmin);
       if (success) {
         router.push('/');
       } else {
         setError('Credenciales inválidas');
       }
     } catch (error) {
-      setError('Error al iniciar sesión' + error);
+      setError('Error al iniciar sesión');
     }
   };
 
@@ -78,7 +78,7 @@ export default function Login() {
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                {isAdmin ? 'Usuario' : 'Nombre'}
+                {isAdmin ? 'Usuario Admin' : 'Usuario Edecán'}
               </label>
               <div className="mt-1 relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -91,34 +91,32 @@ export default function Login() {
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="h-12 block w-full pl-10 rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500 text-black" 
-                  placeholder={isAdmin ? "Usuario admin" : "Tu nombre"}
+                  className="h-12 block w-full pl-10 rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500 text-black"
+                  placeholder={isAdmin ? "admin" : "edecan1"}
                 />
               </div>
             </div>
 
-            {isAdmin && (
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                  Contraseña
-                </label>
-                <div className="mt-1 relative rounded-md shadow-sm">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <KeyIcon className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    required={isAdmin}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="h-12 block w-full pl-10 rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500 text-black"
-                    placeholder="••••••••"
-                  />
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Contraseña
+              </label>
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <KeyIcon className="h-5 w-5 text-gray-400" />
                 </div>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="h-12 block w-full pl-10 rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500 text-black"
+                  placeholder="••••••••"
+                />
               </div>
-            )}
+            </div>
 
             {error && (
               <div className="text-red-600 text-sm text-center">

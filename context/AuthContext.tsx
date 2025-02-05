@@ -3,7 +3,7 @@ import { User, UserRole } from '@/types/auth';
 
 interface AuthContextType {
   user: User | null;
-  login: (name: string, password?: string) => Promise<boolean>;
+  login: (name: string, password: string, isAdmin: boolean) => Promise<boolean>;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -15,6 +15,9 @@ const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
 });
 
+// Contraseña genérica para edecanes
+const EDECAN_PASSWORD = 'yummies123';
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
@@ -25,21 +28,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const login = async (name: string, password?: string): Promise<boolean> => {
-    if (password) {
+  const login = async (name: string, password: string, isAdmin: boolean): Promise<boolean> => {
+    if (isAdmin) {
       if (name === 'admin' && password === 'Boost@123') {
         const adminUser: User = { name: 'Administrador', role: 'admin' };
         setUser(adminUser);
         localStorage.setItem('user', JSON.stringify(adminUser));
         return true;
       }
-      return false;
+    } else {
+      // Verificar solo la contraseña genérica para edecanes
+      if (password === EDECAN_PASSWORD) {
+        const edecanUser: User = { name, role: 'edecan' };
+        setUser(edecanUser);
+        localStorage.setItem('user', JSON.stringify(edecanUser));
+        return true;
+      }
     }
-
-    const edecanUser: User = { name, role: 'edecan' };
-    setUser(edecanUser);
-    localStorage.setItem('user', JSON.stringify(edecanUser));
-    return true;
+    return false;
   };
 
   const logout = () => {
